@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="HouseManagement.API/HouseManagement.API.csproj" />
+  <Project Path="HouseManagement.Application/HouseManagement.Application.csproj" />
+  <Project Path="HouseManagement.Domain/HouseManagement.Domain.csproj" />
+  <Project Path="HouseManagement.Infrastructure/HouseManagement.Infrastructure.csproj" />
+</Solution>
