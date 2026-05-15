@@ -30,9 +30,7 @@ public static class Startup
       app.UseSwaggerUI();
     }
 
-    // TO-DO: 
-    // app.ConfigureCORS();
-
+    app.ConfigureCors();
     app.UseHttpsRedirection();
     app.UseAuthorization();
     app.MapControllers();
@@ -46,6 +44,18 @@ public static class Startup
     services.AddDbContext<HouseManagementDbContext>(options =>
     {
       options.UseNpgsql(connectionString);
+    });
+  }
+
+  private static void ConfigureCors(this WebApplication app)
+  {
+    var origins = app.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+
+    app.UseCors(policy =>
+    {
+      policy.WithOrigins(origins!);
+      policy.AllowAnyMethod();
+      policy.AllowAnyHeader();
     });
   }
 }
