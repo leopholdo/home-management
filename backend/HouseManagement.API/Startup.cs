@@ -1,3 +1,4 @@
+using HouseManagement.Infrastructure.DependencyInjection;
 using HouseManagement.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 namespace HouseManagement.API;
@@ -13,8 +14,9 @@ public static class Startup
     services.AddEndpointsApiExplorer();
     services.AddSwaggerGen();
 
-    // Database context
+    // Database and Dependency Injection
     services.ConfigureDbContext(configuration);
+    services.Inject();
   }
 
   public static WebApplication Configure(this WebApplicationBuilder builder)
@@ -28,9 +30,7 @@ public static class Startup
       app.UseSwaggerUI();
     }
 
-    // TO-DO: 
-    // app.ConfigureCORS();
-
+    app.ConfigureCors();
     app.UseHttpsRedirection();
     app.UseAuthorization();
     app.MapControllers();
@@ -44,6 +44,18 @@ public static class Startup
     services.AddDbContext<HouseManagementDbContext>(options =>
     {
       options.UseNpgsql(connectionString);
+    });
+  }
+
+  private static void ConfigureCors(this WebApplication app)
+  {
+    var origins = app.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+
+    app.UseCors(policy =>
+    {
+      policy.WithOrigins(origins!);
+      policy.AllowAnyMethod();
+      policy.AllowAnyHeader();
     });
   }
 }

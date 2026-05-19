@@ -13,6 +13,9 @@ public class HouseManagementDbContext : DbContext
   public DbSet<ShoppingList> ShoppingLists => Set<ShoppingList>();
   public DbSet<ShoppingListItem> ShoppingListItems => Set<ShoppingListItem>();
 
+  // TODO: Feature ainda por implementar.
+  // public DbSet<ShoppingSuggestion> Suggestions => Set<ShoppingSuggestion>();
+
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     base.OnModelCreating(modelBuilder);
@@ -29,7 +32,7 @@ public class HouseManagementDbContext : DbContext
         .SelectMany(t => t.GetProperties())
         .Where(p => p.ClrType == typeof(DateTime) || p.ClrType == typeof(DateTime?)))
     {
-      property.SetColumnType("timestamp without time zone");
+      property.SetColumnType("timestamp with time zone");
     }
   }
 }
