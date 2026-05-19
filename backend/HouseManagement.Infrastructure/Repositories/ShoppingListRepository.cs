@@ -15,11 +15,13 @@ public class ShoppingListRepository : IShoppingListRepository
     _context = context;
   }
 
-  public async Task<IEnumerable<ShoppingListSummaryDto>> GetAllAsync(CancellationToken cancellationToken = default)
+  public async Task<IEnumerable<ShoppingListSummaryDto>> GetAllAsync(bool isDeleted, CancellationToken cancellationToken = default)
   {
-    return await _context.ShoppingLists
-      .AsNoTracking()
-      .Select(list => new ShoppingListSummaryDto(
+    IQueryable<ShoppingList> query = _context.ShoppingLists.AsNoTracking().OrderByDescending(list => list.CreatedAt);
+
+    query = query.Where(list => list.IsDeleted == isDeleted);
+
+    return await query.Select(list => new ShoppingListSummaryDto(
         list.Id,
         list.Name,
         list.Items.Count,
@@ -48,6 +50,12 @@ public class ShoppingListRepository : IShoppingListRepository
     await _context.SaveChangesAsync(cancellationToken);
   }
 
+  public async Task ToggleDeletedAsync(ShoppingList shoppingList, CancellationToken cancellationToken = default)
+  {
+    shoppingList.IsDeleted = !shoppingList.IsDeleted;
+    _context.ShoppingLists.Update(shoppingList);
+    await _context.SaveChangesAsync(cancellationToken);
+  }
   public async Task DeleteAsync(ShoppingList shoppingList, CancellationToken cancellationToken = default)
   {
     _context.ShoppingLists.Remove(shoppingList);

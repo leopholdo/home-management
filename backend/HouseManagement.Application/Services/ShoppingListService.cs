@@ -23,9 +23,9 @@ public class ShoppingListService : IShoppingListService
     }
 
 
-    public async Task<IEnumerable<ShoppingListSummaryDto>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ShoppingListSummaryDto>> GetAllAsync(bool isDeleted, CancellationToken cancellationToken = default)
     {
-        var lists = await _shoppingListRepository.GetAllAsync(cancellationToken);
+        var lists = await _shoppingListRepository.GetAllAsync(isDeleted, cancellationToken);
         return _mapper.Map<IEnumerable<ShoppingListSummaryDto>>(lists);
     }
 
@@ -61,6 +61,14 @@ public class ShoppingListService : IShoppingListService
 
         await _shoppingListRepository.UpdateAsync(shoppingList, cancellationToken);
         return _mapper.Map<ShoppingListDto>(shoppingList);
+    }
+
+    public async Task ToggleDeletedAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var shoppingList = await _shoppingListRepository.GetByIdAsync(id, cancellationToken)
+            ?? throw new KeyNotFoundException($"ShoppingList with id '{id}' was not found.");
+
+        await _shoppingListRepository.ToggleDeletedAsync(shoppingList, cancellationToken);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)

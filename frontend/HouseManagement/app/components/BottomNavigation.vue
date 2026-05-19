@@ -1,25 +1,29 @@
 <template>
-  <v-layout style="height: 56px;">
-    <v-bottom-navigation
-      v-model="activeNavigation"
-      color="primary"
-      grow mandatory>
-      <v-btn value="shopping-list" variant="plain">
-        <v-icon>mdi-list-box</v-icon>
-        Listas
-      </v-btn>
-    </v-bottom-navigation>
-  </v-layout>
+  <v-bottom-navigation
+    v-model="activeNavigation"
+    color="primary"
+    grow
+    mandatory>
+    <v-btn
+      value="shopping-list"
+      variant="plain">
+      <v-icon>mdi-list-box</v-icon>
+      Listas
+    </v-btn>
+  </v-bottom-navigation>
 </template>
 
 <script setup>
   import { ref } from 'vue'
   import { useRoute } from 'vue-router'
 
-  const activeNavigation = ref()
   const route = useRoute()
 
-  onMounted(() => {
-    activeNavigation.value = route.name
+  const activeNavigation = computed(() => {
+    if (route.path.startsWith('/shopping-list')) {
+      return 'shopping-list'
+    }
+
+    return null
   })
 </script>

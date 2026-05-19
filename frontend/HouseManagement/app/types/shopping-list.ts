@@ -17,6 +17,12 @@ export interface CreateShoppingListDto {
   name: string
 }
 
+export interface UpdateShoppingListDto {
+  name: string
+  notes?: string
+  isCompleted: boolean
+}
+
 export interface CreateShoppingItemDto {
   name: string
   quantity: number

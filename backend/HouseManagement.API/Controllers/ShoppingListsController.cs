@@ -22,9 +22,9 @@ public class ShoppingListsController : ControllerBase
     // GET api/shoppinglists
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<ShoppingListDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll([FromQuery] bool? isDeleted, CancellationToken cancellationToken)
     {
-        var lists = await _shoppingListService.GetAllAsync(cancellationToken);
+        var lists = await _shoppingListService.GetAllAsync(isDeleted ?? false, cancellationToken);
         return Ok(lists);
     }
 
@@ -81,6 +81,27 @@ public class ShoppingListsController : ControllerBase
         {
             var updated = await _shoppingListService.UpdateAsync(id, request, cancellationToken);
             return Ok(updated);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Deleta ou restaura logicamente uma lista de compras existente.
+    /// </summary>
+    /// <param name="id">O ID da lista de compras.</param>
+    // DELETE api/shoppinglists/toggledeleted/{id}
+    [HttpDelete("toggledeleted/{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ToggleDeleted(Guid id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _shoppingListService.ToggleDeletedAsync(id, cancellationToken);
+            return NoContent();
         }
         catch (KeyNotFoundException ex)
         {
