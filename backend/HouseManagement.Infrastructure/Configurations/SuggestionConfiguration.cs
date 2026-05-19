@@ -8,12 +8,24 @@ public class SuggestionConfiguration : IEntityTypeConfiguration<ShoppingSuggesti
 {
   public void Configure(EntityTypeBuilder<ShoppingSuggestion> builder)
   {
-    builder.ToTable("Suggestion");
+    builder.ToTable("ShoppingSuggestions");
 
     builder.HasKey(x => x.Id);
 
     builder.Property(x => x.Name)
-        .HasMaxLength(100)
-        .IsRequired();
+      .HasMaxLength(200)
+      .IsRequired();
+
+    builder.Property(x => x.NameNormalized)
+      .HasMaxLength(200)
+      .IsRequired();
+
+    builder.HasIndex(x => x.Name).IsUnique();
+
+    builder.HasIndex(x => x.NameNormalized)
+      .HasMethod("GIN")
+      .HasOperators("gin_trgm_ops");
+
+    builder.HasIndex(x => new { x.UsageCount, x.LastUsedAt });
   }
 }
