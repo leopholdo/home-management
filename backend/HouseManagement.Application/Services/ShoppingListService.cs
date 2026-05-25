@@ -118,6 +118,44 @@ public class ShoppingListService : IShoppingListService
         return _mapper.Map<ShoppingListItemDto>(item);
     }
 
+    public async Task<IEnumerable<ShoppingListItemDto>> UpsertBatchItemsAsync(Guid shoppingListId, UpsertBatchShoppingListItemsRequest request, CancellationToken cancellationToken = default)
+    {
+        var shoppingList = await _shoppingListRepository.GetByIdAsync(shoppingListId, cancellationToken)
+            ?? throw new KeyNotFoundException($"ShoppingList with id '{shoppingListId}' was not found.");
+
+        // Add new items
+        foreach (var itemAdded in request.ItemsToAdd)
+        {
+            shoppingList.Items.Add(new ShoppingListItem
+            {
+                Name = itemAdded.Name,
+                Quantity = itemAdded.Quantity,
+                IsCompleted = false
+            });
+        }
+
+        // Update existing items
+        foreach (var itemUpdated in request.ItemsToUpdate)
+        {
+            var item = shoppingList.Items.FirstOrDefault(i => i.Id == itemUpdated.Id)
+                ?? throw new KeyNotFoundException($"ShoppingListItem with id '{itemUpdated.Id}' was not found in ShoppingList '{shoppingListId}'.");
+
+            item.Quantity = itemUpdated.Quantity;
+        }
+
+        // Remove items
+        foreach (var itemRemoved in request.ItemsToRemove)
+        {
+            var item = shoppingList.Items.FirstOrDefault(i => i.Id == itemRemoved.Id)
+                ?? throw new KeyNotFoundException($"ShoppingListItem with id '{itemRemoved.Id}' was not found in ShoppingList '{shoppingListId}'.");
+
+            shoppingList.Items.Remove(item);
+        }
+
+        await _shoppingListRepository.UpdateAsync(shoppingList, cancellationToken);
+        return shoppingList.Items.Select(_mapper.Map<ShoppingListItemDto>);
+    }
+
     public async Task DeleteItemAsync(Guid shoppingListId, Guid itemId, CancellationToken cancellationToken = default)
     {
         _ = await _shoppingListRepository.GetByIdAsync(shoppingListId, cancellationToken)

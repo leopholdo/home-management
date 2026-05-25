@@ -182,6 +182,33 @@ public class ShoppingListsController : ControllerBase
     }
 
     /// <summary>
+    /// Atualiza itens da lista de compras existente via batch.
+    /// </summary>
+    /// <param name="id">O ID da lista de compras.</param>
+    /// <param name="request">Os dados para atualização dos itens da lista de compras.</param>
+    /// <returns>Retorna os itens da lista de compras atualizados.</returns>
+    // PUT api/shoppinglists/{id}/upsert-batch-items
+    [HttpPut("upsert-batch-items/{id:guid}")]
+    [ProducesResponseType(typeof(IEnumerable<ShoppingListItemDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpsertBatchItem(Guid id, [FromBody] UpsertBatchShoppingListItemsRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var item = await _shoppingListService.UpsertBatchItemsAsync(id, request, cancellationToken);
+            return Ok(item);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Deleta um item da lista de compras existente.
     /// </summary>
     /// <param name="id">O ID da lista de compras.</param>

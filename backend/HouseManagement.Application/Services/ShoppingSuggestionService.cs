@@ -24,11 +24,12 @@ public class ShoppingSuggestionService : IShoppingSuggestionService
     return items.Select(Map);
   }
 
-  public async Task RecordUsageAsync(string name, CancellationToken ct = default)
+  public async Task AddSuggestionAsync(string name, CancellationToken ct = default)
   {
     var nameNormalized = TextNormalizer.Normalize(name);
     var existing = await _repository.GetByNameNormalizedAsync(nameNormalized, ct);
 
+    // prevents duplicate suggestions
     if (existing is not null)
     {
       existing.UsageCount++;

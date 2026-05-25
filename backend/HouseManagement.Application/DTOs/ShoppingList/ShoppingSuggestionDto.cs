@@ -4,6 +4,6 @@ public record ShoppingSuggestionDto(
   int UsageCount
 );
 
-public record RecordUsageRequest(
+public record AddSuggestionRequest(
   string Name
 );

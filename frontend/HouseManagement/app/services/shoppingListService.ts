@@ -40,12 +40,30 @@ export const useShoppingListService = () => {
     return await api<void>(`/ShoppingLists/${id}`, { method: 'DELETE' })
   }
 
+  const removeItem = async (listId: string, itemId: string) => {
+    return await api<void>(`/ShoppingLists/${listId}/items/${itemId}`, { method: 'DELETE' })
+  }
+
+  const updateItem = async (listId: string, itemId: string, dto: UpdateShoppingListItemDto) => {
+    return await api<void>(`/ShoppingLists/${listId}/items/${itemId}`, { method: 'PUT', body: dto })
+  }
+
+  const updateItemsBatch = async (id: string, dto: UpdateBatchShoppingListItemsRequest) => {
+    return await api<ShoppingListItemDto[]>(`/ShoppingLists/upsert-batch-items/${id}`, {
+      method: 'PUT',
+      body: dto,
+    })
+  }
+
   return {
     getAll,
     getById,
     create,
     updateList,
+    updateItemsBatch,
     toggleDeleted,
     remove,
+    removeItem,
+    updateItem,
   }
 }

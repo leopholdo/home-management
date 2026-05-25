@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HouseManagement.API.Controllers;
 
 [ApiController]
-[Route("api/shopping-suggestions")]
+[Route("api/ShoppingSuggestions")]
 public class ShoppingSuggestionsController : ControllerBase
 {
   private readonly IShoppingSuggestionService _service;
@@ -16,7 +16,7 @@ public class ShoppingSuggestionsController : ControllerBase
   /// <param name="term">O termo de busca.</param>
   /// <param name="limit">O limite de resultados.</param>
   /// <returns>Retorna as sugestões de compras.</returns>
-  // GET api/shopping-suggestions
+  // GET api/ShoppingSuggestions
   [HttpGet]
   public async Task<IActionResult> Get(
       [FromQuery] string? term,
@@ -31,20 +31,20 @@ public class ShoppingSuggestionsController : ControllerBase
   }
 
   /// <summary>
-  /// Registra uso de um produto (incrementa ranking). Chamado quando o usuário confirma a seleção.
+  /// Registra uma nova sugestão de produto. Chamado quando o usuário adiciona uma sugestão manualmente.
   /// </summary>
-  /// <param name="request">DTO com o nome do produto</param>
+  /// <param name="request">DTO com o nome da sugestão</param>
   /// <returns>Retorna um resultado indicando o sucesso ou falha da operação.</returns>
-  // POST api/shopping-suggestions/usage
-  [HttpPost("usage")]
-  public async Task<IActionResult> RecordUsage(
-      [FromBody] RecordUsageRequest request,
+  // POST api/ShoppingSuggestions/addSuggestion
+  [HttpPost("addSuggestion")]
+  public async Task<IActionResult> AddSuggestion(
+      [FromBody] AddSuggestionRequest request,
       CancellationToken ct = default)
   {
     if (string.IsNullOrWhiteSpace(request.Name))
       return BadRequest("Name is required.");
 
-    await _service.RecordUsageAsync(request.Name, ct);
+    await _service.AddSuggestionAsync(request.Name, ct);
     return NoContent();
   }
 }
