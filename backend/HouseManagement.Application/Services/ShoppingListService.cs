@@ -140,7 +140,8 @@ public class ShoppingListService : IShoppingListService
             var item = shoppingList.Items.FirstOrDefault(i => i.Id == itemUpdated.Id)
                 ?? throw new KeyNotFoundException($"ShoppingListItem with id '{itemUpdated.Id}' was not found in ShoppingList '{shoppingListId}'.");
 
-            item.Quantity = itemUpdated.Quantity;
+            item.Quantity = itemUpdated.Quantity ?? item.Quantity;
+            item.IsCompleted = itemUpdated.IsCompleted ?? item.IsCompleted;
         }
 
         // Remove items

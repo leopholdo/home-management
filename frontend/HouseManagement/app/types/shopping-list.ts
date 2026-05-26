@@ -61,7 +61,8 @@ export interface UpdateBatchShoppingListItemsRequest {
   }[]
   itemsToUpdate: {
     id: string
-    quantity: number
+    quantity?: number
+    isCompleted?: boolean
   }[]
   itemsToRemove: {
     id: string

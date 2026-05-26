@@ -37,7 +37,8 @@ public class AddShoppingListItemBatchRequest
 public class UpdateShoppingListItemBatchRequest
 {
     public Guid Id { get; set; }
-    public int Quantity { get; set; }
+    public int? Quantity { get; set; }
+    public bool? IsCompleted { get; set; }
 }
 
 public class DeleteShoppingListItemBatchRequest
