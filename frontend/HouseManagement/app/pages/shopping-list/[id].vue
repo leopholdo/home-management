@@ -8,52 +8,93 @@
         @click="$router.push('/shopping-list')"></v-btn>
       <span class="text-title-medium font-weight-semibold">{{ list?.name }}</span>
     </div>
+    <div
+      v-if="!list?.items.length && !isLoading"
+      class="d-flex flex-column align-center justify-center flex-grow-1 ga-2">
+      <v-icon
+        size="50"
+        color="primary">
+        mdi-cart-off
+      </v-icon>
+      <div>
+        <p class="text-body-large text-center mb-0">Sua lista de compras está vazia</p>
+        <p class="text-body-large text-medium-emphasis text-center my-0">
+          Comece adicionando itens apertando no botão abaixo
+        </p>
+      </div>
+    </div>
     <TransitionGroup
+      v-else
       name="shopping-list"
-      tag="v-list"
+      tag="div"
       class="bg-surface">
-      <v-list-item
-        class="py-2"
-        :class="{ 'complete-effect': item.isCompleting }"
+      <div
         v-for="item in orderedItems"
-        :key="item.id">
-        <template #prepend>
-          <v-icon-btn
-            :icon="
-              item.isCompleted || item.isCompleting ? 'mdi-check-circle' : 'mdi-circle-outline'
-            "
-            :color="item.isCompleted || item.isCompleting ? 'success' : 'primary'"
-            variant="text"
-            @click="changeItemStatus(item)"></v-icon-btn>
-        </template>
+        :key="item.id"
+        class="swipe-wrapper">
+        <div class="swipe-action-delete">
+          <v-btn
+            icon="mdi-delete"
+            color="error"
+            variant="flat"
+            @click="removeItem(item)" />
+        </div>
+        <div
+          class="swipe-content"
+          :style="{
+            transform: `translateX(${item.offset || 0}px)`,
+          }"
+          v-touch="{
+            start: (e) => onTouchStart(e, item),
+            move: (e) => onTouchMove(e, item),
+            end: () => onTouchEnd(item),
+          }">
+          <v-list-item
+            class="py-2 bg-surface"
+            :class="{ 'complete-effect': item.isCompleting }">
+            <template #prepend>
+              <v-btn
+                :icon="
+                  item.isCompleted || item.isCompleting ? 'mdi-check-circle' : 'mdi-circle-outline'
+                "
+                :color="item.isCompleted || item.isCompleting ? 'success' : 'primary'"
+                variant="text"
+                @click="changeItemStatus(item)" />
+            </template>
 
-        <v-list-item-title>
-          {{ item.name }}
-        </v-list-item-title>
+            <v-list-item-title>
+              {{ item.name }}
+            </v-list-item-title>
 
-        <template #append>
-          <div class="d-flex align-center ga-2">
-            <v-btn
-              :disabled="item.quantity <= 0 || item.isCompleted || item.isCompleting"
-              icon="mdi-minus"
-              size="x-small"
-              variant="text"
-              @click.stop="decrementItem(item)" />
+            <template #append>
+              <div class="d-flex align-center ga-2">
+                <v-btn
+                  :disabled="item.quantity <= 0 || item.isCompleted || item.isCompleting"
+                  icon="mdi-minus"
+                  size="x-small"
+                  variant="text"
+                  @click.stop="decrementItem(item)" />
 
-            <span :class="{ 'text-disabled': item.isCompleted || item.isCompleting }">
-              {{ item.quantity }}
-            </span>
+                <span
+                  :class="{
+                    'text-disabled': item.isCompleted || item.isCompleting,
+                  }">
+                  {{ item.quantity }}
+                </span>
 
-            <v-btn
-              :disabled="item.isCompleted || item.isCompleting"
-              icon="mdi-plus"
-              size="x-small"
-              variant="text"
-              @click.stop="addItem(item)" />
-          </div>
-        </template>
-      </v-list-item>
+                <v-btn
+                  :disabled="item.isCompleted || item.isCompleting"
+                  icon="mdi-plus"
+                  size="x-small"
+                  variant="text"
+                  @click.stop="addItem(item)" />
+              </div>
+            </template>
+          </v-list-item>
+        </div>
+      </div>
     </TransitionGroup>
+
     <div class="mt-auto mb-4 px-4">
       <v-btn
         class="w-100"
@@ -90,6 +131,7 @@
     itemsToRemove: [],
   })
   const syncTimeout = ref<NodeJS.Timeout | null>(null)
+  const touchStartX = ref(0)
 
   const orderedItems = computed(() => {
     const items = list.value?.items
@@ -183,6 +225,12 @@
   }
 
   function changeItemStatus(item: Record<ShoppingListItem>) {
+    // close all opened rows
+    closeAllItems()
+
+    // force reset current item
+    item.offset = 0
+
     if (item.isCompleted) {
       item.isCompleted = false
 
@@ -226,9 +274,48 @@
     scheduleSync()
   }
 
+  function removeItem(item: ShoppingListItem) {
+    list.value!.items = list.value!.items.filter((i) => i.id !== item.id)
+
+    queueRemove(item.id)
+
+    scheduleSync()
+  }
+
   function onListUpdated(updatedItems: Record<ShoppingListItem>[]) {
     if (list.value) {
       list.value.items = updatedItems
+    }
+  }
+
+  function closeAllItems() {
+    list.value?.items.forEach((item) => {
+      item.offset = 0
+    })
+  }
+
+  function onTouchStart(e: TouchEvent, item: ShoppingListItem) {
+    closeAllItems()
+
+    touchStartX.value = e.originalEvent.touches[0].clientX
+  }
+
+  function onTouchMove(e: any, item: ShoppingListItem) {
+    const currentX = e.originalEvent.touches[0].clientX
+
+    const diff = currentX - touchStartX.value
+
+    // only swipe left
+    if (diff < 0) {
+      item.offset = Math.max(diff, -90)
+    }
+  }
+
+  function onTouchEnd(item: ShoppingListItem) {
+    if ((item.offset || 0) < -45) {
+      item.offset = -90
+    } else {
+      item.offset = 0
     }
   }
 
@@ -245,6 +332,72 @@
   .shopping-list-enter-active,
   .shopping-list-leave-active {
     transition: all 0.35s ease;
+  }
+
+  .complete-effect {
+    animation: completeFlash 0.7s ease;
+  }
+
+  @keyframes completeFlash {
+    0% {
+      background-color: transparent;
+    }
+
+    50% {
+      background-color: rgba(76, 175, 80, 0.35);
+    }
+
+    100% {
+      background-color: transparent;
+    }
+  }
+
+  .shopping-list-move {
+    transition: transform 0.35s ease;
+  }
+
+  .shopping-list-enter-active,
+  .shopping-list-leave-active {
+    transition: all 0.35s ease;
+  }
+
+  .shopping-list-leave-active {
+    position: absolute;
+    width: 100%;
+  }
+
+  .swipe-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .swipe-content {
+    position: relative;
+    z-index: 2;
+
+    will-change: transform;
+
+    transition: transform 0.2s ease;
+
+    touch-action: pan-y;
+
+    background: rgb(var(--v-theme-surface));
+  }
+
+  .swipe-action-delete {
+    position: absolute;
+
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    width: 90px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgb(var(--v-theme-error));
   }
 
   .complete-effect {
