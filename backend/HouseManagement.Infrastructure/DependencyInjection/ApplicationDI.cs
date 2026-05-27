@@ -18,9 +18,11 @@ public static class ApplicationDI
         // Repositories
         services.AddScoped<IShoppingListRepository, ShoppingListRepository>();
         services.AddScoped<IShoppingListItemRepository, ShoppingListItemRepository>();
+        services.AddScoped<IShoppingSuggestionRepository, ShoppingSuggestionRepository>();
 
         // Services
         services.AddScoped<IShoppingListService, ShoppingListService>();
+        services.AddScoped<IShoppingSuggestionService, ShoppingSuggestionService>();
 
         // AutoMapper profile
         services.AddAutoMapper(cfg => cfg.AddProfile<AutomapperProfiles>());

@@ -51,7 +51,7 @@
                 style="margin-right: -15px"
                 icon="mdi-dots-vertical"
                 variant="text"
-                @click="onClickListMenu(list)"></v-icon-btn>
+                @click.stop="onClickListMenu(list)"></v-icon-btn>
             </v-card-title>
             <v-card-subtitle v-if="list.notes">{{ list.notes }}</v-card-subtitle>
             <v-card-text class="mt-2">

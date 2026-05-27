@@ -15,4 +15,5 @@ public interface IShoppingListService
     Task<ShoppingListItemDto> AddItemAsync(Guid shoppingListId, CreateShoppingListItemRequest request, CancellationToken cancellationToken = default);
     Task<ShoppingListItemDto> UpdateItemAsync(Guid shoppingListId, Guid itemId, UpdateShoppingListItemRequest request, CancellationToken cancellationToken = default);
     Task DeleteItemAsync(Guid shoppingListId, Guid itemId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<ShoppingListItemDto>> UpsertBatchItemsAsync(Guid shoppingListId, UpsertBatchShoppingListItemsRequest request, CancellationToken cancellationToken = default);
 }

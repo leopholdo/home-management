@@ -29,3 +29,42 @@ export interface CreateShoppingItemDto {
   unit: string
   shoppingListId: string
 }
+
+export interface UpdateShoppingListItemDto {
+  name: string
+  quantity: number
+  notes?: string
+  isCompleted: boolean
+}
+
+export interface AddSuggestionRequest {
+  name: string
+}
+
+export interface SearchShoppingSuggestion {
+  term: string
+  page: number
+  limit: number
+}
+
+export interface ShoppingSuggestion {
+  id: string
+  name: string
+  usageCount: number
+}
+
+export interface UpdateBatchShoppingListItemsRequest {
+  itemsToAdd: {
+    id: string
+    name: string
+    quantity: number
+  }[]
+  itemsToUpdate: {
+    id: string
+    quantity?: number
+    isCompleted?: boolean
+  }[]
+  itemsToRemove: {
+    id: string
+  }[]
+}

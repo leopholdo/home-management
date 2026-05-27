@@ -12,9 +12,7 @@ public class HouseManagementDbContext : DbContext
 
   public DbSet<ShoppingList> ShoppingLists => Set<ShoppingList>();
   public DbSet<ShoppingListItem> ShoppingListItems => Set<ShoppingListItem>();
-
-  // TODO: Feature ainda por implementar.
-  // public DbSet<ShoppingSuggestion> Suggestions => Set<ShoppingSuggestion>();
+  public DbSet<ShoppingSuggestion> ShoppingSuggestions => Set<ShoppingSuggestion>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
@@ -22,7 +20,26 @@ public class HouseManagementDbContext : DbContext
 
     modelBuilder.ApplyConfigurationsFromAssembly(typeof(HouseManagementDbContext).Assembly);
 
+    modelBuilder.HasDbFunction(
+    typeof(HouseManagementDbContext)
+        .GetMethod(nameof(TrigramSimilarity))!)
+    .HasName("similarity");
+
     ConfigureGlobalConventions(modelBuilder);
+  }
+
+  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+  {
+    base.OnConfiguring(optionsBuilder);
+
+    optionsBuilder.UseSeeding((context, _) =>
+    {
+      // Seed Shopping Suggestions
+      if (context.Set<ShoppingSuggestion>().Any()) return;
+      context.Set<ShoppingSuggestion>().AddRange(ShoppingSuggestionSeed.Get());
+
+      context.SaveChanges();
+    });
   }
 
   private void ConfigureGlobalConventions(ModelBuilder modelBuilder)
@@ -35,4 +52,8 @@ public class HouseManagementDbContext : DbContext
       property.SetColumnType("timestamp with time zone");
     }
   }
+
+  [DbFunction("similarity", IsNullable = false)]
+  public static double TrigramSimilarity(string a, string b)
+    => throw new NotSupportedException("EF Core translation only.");
 }
