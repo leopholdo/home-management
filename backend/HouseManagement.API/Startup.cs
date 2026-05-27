@@ -23,12 +23,12 @@ public static class Startup
   {
     var app = builder.Build();
 
-    // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
-    {
-      app.UseSwagger();
-      app.UseSwaggerUI();
-    }
+    // TO-DO: Descomentar linhas abaixo para habilitar Swagger apenas em ambiente de desenvolvimento
+    // if (app.Environment.IsDevelopment())
+    // {
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    // }
 
     app.ConfigureCors();
     app.UseHttpsRedirection();
